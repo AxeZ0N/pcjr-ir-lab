@@ -2221,3 +2221,48 @@ the measured behavior instead of adding a custom argparse error path.
 
 Note: both `docs/jr_tool_spec.md` and `refs/jr-tools/jr-manual.md` are
 outside the payload replacement allowlist; these edits are manual.
+## 2026-09-04 · anchor_regeneration_declined · decision
+
+Contract-A anchor regeneration for IRPING2 and CH0CAL is declined.
+The pre-Contract-A anchors stay as-is; their measured exit-4 signatures
+(`entry` `0E1F55E8`, `epilogue` `A05DCB`) are the permanent `jr build`
+state, not a blocked intermediate path.
+
+Consequences recorded here:
+- The rebuild path via `jr build` for IRPING2/CH0CAL is closed, not
+  pending.
+- No hardware-backed regeneration session is planned.
+- Positive discrimination is supplied by the BRIDGEA lint fixture
+  instead of a regenerated hardware anchor.
+
+supersedes: anchor_irping2_pre_contract_a
+supersedes: anchor_ch0cal_pre_contract_a
+
+## 2026-09-04 · bridgea_positive_control_fixture · empirical
+
+`BRIDGEA` is a synthetic pure-bridge positive control. Built at
+`jr build --shape bridge --stage 6 --result 128`, status pass, zero
+warnings, all eleven rules active. 28 bytes:
+`0E1F5506E800005D8D6E79C6460042B000E6A0E4A0B080E6A0075DCB`.
+
+Contract-A verified in one artifact:
+- entry `0E 1F 55 06` (ES preserved)
+- selfloc disp `79` (= 121 = R−7)
+- latch-read, nmi-mask, nmi-restore all present
+- epilogue `07 5D CB`
+
+Lint-fixture class, NOT a hardware anchor: emission gate passed, stage
+gate not run. No anchor status, no hardware validation, no test_log.
+Files: `docs/anchors/BRIDGEA.ASM` / `docs/anchors/BRIDGEA.BAS`.
+
+supersedes: jr_lint_v2_phase6_negative_discrimination
+
+## 2026-09-04 · jr_lint_v2_refactor_spec_complete · decision
+
+`docs/jr_lint_v2_refactor_spec.md` is complete: Phases 1–6 and the
+repair phase R all landed and are recorded. The file is a finished
+project plan, superseded as an active planning document by
+`docs/jr_tool_spec.md` (living spec, already carries the v2 CLI,
+config, stage-gating, and `--rules` drift content).
+
+supersedes: jr_lint_v2_composite_epilogue_gap
