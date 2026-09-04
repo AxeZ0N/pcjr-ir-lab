@@ -2119,3 +2119,80 @@ Measured behavior differs by surface:
   a default bridge lint; it does not reject the call.
 
 Neither surface errors with the spec's wording.
+## 2026-09-04 · anchor_irping2_pre_contract_a · empirical
+
+`jr build --shape bridge --stage 6` on `docs/anchors/IRPING2.ASM` exits
+4: `entry` rule finds `0E1F55E8` (no `06` ES push; `E8` is the selfloc
+call), `epilogue` rule finds `A05DCB` (no `07`; trailing `E4 A0` clear
+latch before `5D CB`). Exact two-rule failure, no selfloc/budget/NMI
+false positives. The anchor remains hardware-validated; the source is
+pre-Contract-A and its rebuild path via `jr build` is blocked until a
+hardware-backed regeneration.
+
+## 2026-09-04 · anchor_ch0cal_pre_contract_a · empirical
+
+`jr build --shape bridge --stage 6` on `docs/anchors/CH0CAL.ASM` exits
+4 with the identical signature as IRPING2: `entry` `0E1F55E8`,
+`epilogue` `A05DCB`. CH0CAL staleness converts from era-suspicion to
+measured fact. The `+122` selfloc form did not add a third failure in
+this run; build short-circuited at entry/epilogue.
+
+## 2026-09-04 · jr_lint_v2_phase6_negative_discrimination · empirical
+
+Phase 6 negative side verified: the v2 bridge linter catches
+pre-Contract-A anchors on exactly the drifted rules (`entry`,
+`epilogue`) with no false positives on unchanged rules. A conforming
+pure-bridge positive control does not exist in the repo — the only
+post-ES anchor (NMIDISPB) is composite — so positive discrimination is
+deferred to anchor regeneration.
+
+## 2026-09-04 · jr_lint_v2_composite_epilogue_gap · open item
+
+`docs/anchors/NMIDISPB.ASM` is a composite binary (bridge installer +
+NMI handler + `chain_target` data), not a pure bridge. `entry` passes;
+the positional `epilogue` suffix rule fails on the trailing
+`0F 00 F0` chain data though the installer epilogue `07 5D CB` is
+present mid-file. Correct behavior for a positional suffix matcher;
+the spec offers no shape for composite binaries. Not a linter defect.
+Decide in a follow-on whether a composite shape is needed or whether
+composites stay lint-as-installer-only.
+
+## 2026-09-04 · jr_ingest_replace_allowlist · decision
+
+`bin/jr-ingest.sh` now applies two member classes: append journals
+(`COMMIT.txt`, `facts.append.md`, `sessions/*.md`,
+`docs/test_log.append.md`) and full-file replacement allowlist
+(`bds/00_system_prompt.md`, `bds/10_skills/*.md`,
+`bds/20_persona/*.md`, `bds/30_project/*.md`,
+`docs/anchors/<PROG>.{BAS,ASM,bin,data}`). Any other zip member is a
+hard error before any write. `bin/` is not ingestible. First-path
+manual replace applies only to `bin/jr-ingest.sh` itself.
+
+## 2026-09-04 · skill_repo_repair · decision
+
+Repo/cache drift repaired. `pcjr_cartridge_basic_asm` v7→v8: Rule 1
+gained the ES-preservation requirement and entry/epilogue byte strings
+(`0E1F5506`, `075DCB`) that the repo skill was missing; Rule 4 selfloc
+listing restored. `pcjr_test_workflow` confirmed v10 (stage-0 row,
+strict-orthogonal). `pcjr_payload_generation` v2→v3 (replacement
+allowlist contract). `pycjr_project.md` pointers corrected to v8/v10.
+BDS cache re-imported from repo per `skill_create_semantics`.
+
+## 2026-09-04 · jr_rules_retirement_drift · open item
+
+`--rules` argparse exits rc=2 (CLI path) and drops silently (MCP path);
+the engine's friendly `use --shape` message is unreachable on the CLI.
+Spec §7 says the old path errors with a friendly message. Unresolved.
+Recommendation: update spec + `jr-manual.md` to the measured argparse
+behavior rather than fight argparse for a custom error path.
+</BDS:create_file>
+<BDS:create_file fileName="sessions/2026-09-04_jr_lint_v2_refactor_close.md">
+
+```markdown
+# Handoff — jr lint v2 refactor close: Phase R repair + Phase 6 regression
+
+Date: 2026-09-04
+Scope: close the jr lint v2 refactor. Phase R (repo/cache context-doc
+repair + jr-ingest replacement path) and Phase 6 (two-sided regression,
+negative side measured). No hardware run, no new anchors.
+
