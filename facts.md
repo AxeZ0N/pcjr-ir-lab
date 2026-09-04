@@ -2178,17 +2178,6 @@ strict-orthogonal). `pcjr_payload_generation` v2→v3 (replacement
 allowlist contract). `pycjr_project.md` pointers corrected to v8/v10.
 BDS cache re-imported from repo per `skill_create_semantics`.
 
-## 2026-09-04 · jr_rules_retirement_drift · open item
-
-`--rules` argparse exits rc=2 (CLI path) and drops silently (MCP path);
-the engine's friendly `use --shape` message is unreachable on the CLI.
-Spec §7 says the old path errors with a friendly message. Unresolved.
-Recommendation: update spec + `jr-manual.md` to the measured argparse
-behavior rather than fight argparse for a custom error path.
-</BDS:create_file>
-<BDS:create_file fileName="sessions/2026-09-04_jr_lint_v2_refactor_close.md">
-
-```markdown
 # Handoff — jr lint v2 refactor close: Phase R repair + Phase 6 regression
 
 Date: 2026-09-04
@@ -2218,18 +2207,6 @@ Repair:
   five-section handoff reconstructed from the 2026-09-04 facts.md
   headings that ARE recorded. It is not byte-identical to the lost
   original; the body beyond the leaked fragment was never captured.
-
-## 2026-09-04 · jr_rules_retirement_drift_duplicate_heading · conflict
-
-`jr_rules_retirement_drift` appears twice in `facts.md`:
-- line 2110, status `empirical` — the measured CLI/MCP behavior.
-- line 2181, status `open item` — the resolution recommendation.
-
-One-fact-per-heading is violated. The two bodies are complementary,
-not superseding. Recommended merge: keep the `empirical` heading as
-the fact body, fold the recommendation into it, delete the duplicate
-`open item` heading. Manual edit; `facts.md` is not
-payload-replaceable.
 
 ## 2026-09-04 · jr_rules_retirement_resolution · decision
 

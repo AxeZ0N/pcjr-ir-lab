@@ -210,8 +210,11 @@ jr build SRC.asm   [--shape bridge|handler|iret] [--stage 0-6]
 jr lint FILE.bin   [same selection flags]
 ```
 
-- `--rules` removed from both subcommands; old paths error with
-`use --shape handler|iret`.
+
+- `--rules` removed from both subcommands. CLI argparse rejects it
+with rc=2 (`unrecognized arguments`) before the engine's friendly
+`use --shape handler|iret` message can fire; FastMCP drops the unknown
+key silently. Recorded as spec drift; the friendly message is MCP-only.
 - `--stage` bridge-only; `--stage` with `handler`/`iret` errors.
 - `--only`/`--skip` take comma-separated ids and group names.
 - Always print the active selection:
