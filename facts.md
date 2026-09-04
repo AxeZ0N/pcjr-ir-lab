@@ -2196,3 +2196,51 @@ Scope: close the jr lint v2 refactor. Phase R (repo/cache context-doc
 repair + jr-ingest replacement path) and Phase 6 (two-sided regression,
 negative side measured). No hardware run, no new anchors.
 
+## 2026-09-04 · facts_tail_scaffold_leak · conflict
+
+`facts.md` lines 2188–2198 contain a leaked BDS payload scaffold: two
+`<BDS:create_file>` tags and the opening lines of the intended
+`sessions/2026-09-04_jr_lint_v2_refactor_close.md` handoff, pasted
+directly into the fact journal instead of being written as the session
+file. The session file itself is absent from `sessions/`.
+
+Consequences:
+- `facts.md` tail is contaminated below the last intact fact heading;
+  the journal appends raw tool markup.
+- The jr lint v2 refactor close handoff was never committed as a
+  session file.
+
+Repair:
+- `facts.md` is not payload-replaceable; the user strips lines
+  2188–2198 manually and commits.
+- This payload restores the missing session file
+  `sessions/2026-09-04_jr_lint_v2_refactor_close.md` with a
+  five-section handoff reconstructed from the 2026-09-04 facts.md
+  headings that ARE recorded. It is not byte-identical to the lost
+  original; the body beyond the leaked fragment was never captured.
+
+## 2026-09-04 · jr_rules_retirement_drift_duplicate_heading · conflict
+
+`jr_rules_retirement_drift` appears twice in `facts.md`:
+- line 2110, status `empirical` — the measured CLI/MCP behavior.
+- line 2181, status `open item` — the resolution recommendation.
+
+One-fact-per-heading is violated. The two bodies are complementary,
+not superseding. Recommended merge: keep the `empirical` heading as
+the fact body, fold the recommendation into it, delete the duplicate
+`open item` heading. Manual edit; `facts.md` is not
+payload-replaceable.
+
+## 2026-09-04 · jr_rules_retirement_resolution · decision
+
+Resolve the `jr_rules_retirement_drift` open item by accepting the
+measured argparse behavior: `--rules` on the CLI exits rc=2
+(`unrecognized arguments`) and FastMCP drops the unknown key silently.
+The engine's friendly `use --shape handler|iret` message is
+unreachable on the CLI path.
+
+Decision: update spec §7 and `refs/jr-tools/jr-manual.md` to document
+the measured behavior instead of adding a custom argparse error path.
+
+Note: both `docs/jr_tool_spec.md` and `refs/jr-tools/jr-manual.md` are
+outside the payload replacement allowlist; these edits are manual.
