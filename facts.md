@@ -2290,3 +2290,16 @@ Current hardware anchor set and contract status:
   intact). `docs/anchors/BRIDGEA.{BAS,ASM}`
 - BASLOAD — sentinel loader pattern reference.
   `docs/anchors/BASLOAD.BAS`
+## 2026-09-04 · bitsamp_source_absent · empirical
+
+`grep_repo files BITSAMP` returns zero paths. The 08-28 CH1-verbatim BITSAMP probe (`ch1_544_verbatim_bitsamp`) was never committed; no retype source exists anywhere in the repo. A Contract-A rebuild must source from the BIOS listing — `KBDNMI` at `0F78`, `I30` at `1031` — not from any anchor.
+
+## 2026-09-04 · probe_b_failure_signatures_split · analysis
+
+Cross-referencing `probe_b_nonzero_work_defect` with `kbdnmi_entry_contract` splits "non-zero work" into three axes:
+
+1. **Register clobber** — KBDNMI save/restore is transparent; a clobbered GPR returns to BASIC. Consistent with the 74-byte AX-clobber → "Syntax error in 160".
+2. **Stack residue** — an un-popped redirect frame breaks the IRET unwind. Consistent with the 86-byte all-registers → hard freeze, no cursor.
+3. **Entry-phase cycle shift** — side-effect-free delay. Untested. Overlaps `sync_reference_phase_hypothesis`.
+
+Axes 1–2 are consistency predictions only — not verified, not empirical, no clean falsifying run. The cycle-shift axis is the live one.
