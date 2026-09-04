@@ -699,3 +699,26 @@ Payload emitted: `COMMIT.txt`, `facts.append.md`, `sessions/2026-08-31_nmi_dispa
   "observed": "passed: keyboard alive, keystroke echoed via INPUT",
   "verdict": "failed_to_disprove — F not observed; H survives one disproof attempt. IRPING2 status unconfirmed in report."
 }
+## 2026-09-04 · IRPING2 regression
+
+{
+  "id": "IRPING2",
+  "source": "IRPING2.BAS",
+  "expected": { "return": "RETURNED OK", "status": "3" },
+  "observed": { "return": "RETURNED OK", "status": "3" },
+  "verdict": "pass",
+  "regression": "none (this is the regression anchor)",
+  "recovery": "cold_power_cycle"
+}
+
+## 2026-09-04 · BRIDGEA positive control
+
+{
+  "id": "BRIDGEA",
+  "source": "BRIDGEA.BAS",
+  "expected": { "return": "RETURNED OK", "marker": "66" },
+  "observed": { "return": "RETURNED OK", "marker": "66" },
+  "verdict": "pass",
+  "regression": "IRPING2",
+  "recovery": "cold_power_cycle"
+}

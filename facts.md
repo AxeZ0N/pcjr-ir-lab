@@ -2266,3 +2266,27 @@ project plan, superseded as an active planning document by
 config, stage-gating, and `--rules` drift content).
 
 supersedes: jr_lint_v2_composite_epilogue_gap
+## 2026-09-04 · bridgea_positive_control_hw_pass · empirical
+
+supersedes: 2026-09-04 · bridgea_positive_control_fixture
+
+BRIDGEA ran on the PCjr through the Cartridge BASIC machine-code bridge.
+Loaded 28 bytes. Observed: "RETURNED OK", marker=66, keyboard intact.
+Contract-A bridge (entry `0E 1F 55 06`, selfloc disp `79`, epilogue
+`07 5D CB`) now confirmed on hardware. BRIDGEA graduates from lint
+fixture to hardware anchor.
+
+Regression run first: IRPING2 status=3, keyboard intact — transport sane.
+
+## 2026-09-04 · anchor_identities · decision
+
+Current hardware anchor set and contract status:
+
+- IRPING2 — pre-Contract-A (no `PUSH ES`); exit 4 measured; transport
+  regression anchor. `docs/anchors/IRPING2.{BAS,ASM}`
+- CH0CAL — pre-Contract-A; exit 4 measured; CH0 clock calibration.
+  `docs/anchors/CH0CAL.{BAS,ASM}`
+- BRIDGEA — Contract-A; hardware pass 2026-09-04 (marker=66, keyboard
+  intact). `docs/anchors/BRIDGEA.{BAS,ASM}`
+- BASLOAD — sentinel loader pattern reference.
+  `docs/anchors/BASLOAD.BAS`
