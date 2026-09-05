@@ -2303,3 +2303,32 @@ Cross-referencing `probe_b_nonzero_work_defect` with `kbdnmi_entry_contract` spl
 3. **Entry-phase cycle shift** — side-effect-free delay. Untested. Overlaps `sync_reference_phase_hypothesis`.
 
 Axes 1–2 are consistency predictions only — not verified, not empirical, no clean falsifying run. The cycle-shift axis is the live one.
+## 2026-09-04 · kbdnmi_firstwait_544_byte_exact · manual-verified
+
+bios_grep peek 3283–3449, byte-exact: 0FC6 BA 0220 = MOV DX,544.
+First-wait target is 544 CH1 ticks, identical to the clone target.
+No 658/660 constant appears anywhere in KBDNMI/I30.
+
+## 2026-09-04 · kbdnmi_di_capture_i5 · manual-verified
+
+DI is seeded at I5 (0FAB–0FB9): latch CH1 (OUT 43h,40h), two NOPs,
+two IN 41h, MOV DI,AX — immediately after the I3 trailing-edge detect.
+I6 (0FBB) is a post-capture 4-sample glitch filter, not a sync reference.
+The frame-feature late-seed branch is closed; ir_protocol_frozen is not
+a prerequisite for the overshoot question.
+supersedes: 2026-08-30 · sync_reference_phase_hypothesis · open item
+
+## 2026-09-04 · ch1_comment_rate_conflict · conflict
+
+The 0FC6 comment self-contradicts: "310.USEC AWAY (.838 US / CT)".
+544 × 0.838 µs = 456 µs, not 310 µs. For 544 counts = 310 µs the tick
+is ~0.570 µs (1.75 MHz); 0.838 µs is 1.19318 MHz (14.318/12 PIT input).
+The 0.838 side is standard; the 310 µs side is the outlier.
+
+## 2026-09-04 · overshoot_cloneside_rate_live · open item
+
+The 114–116 tick overshoot is clone-side. The CH1 latch/read idiom
+cannot cost 114 ticks (two INs, two NOPs); the effective CH1 rate —
+conflicted at 0FC6 — is the live candidate. Next test: direct rate
+measurement — latch CH1, NOP a known cycle count, re-latch, read the
+decrement.
