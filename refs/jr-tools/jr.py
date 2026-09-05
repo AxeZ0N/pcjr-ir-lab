@@ -278,7 +278,8 @@ def check_opcode_absent(rule, data, decoded, ceiling, R):
 def check_before(rule, data, decoded, ceiling, R):
     severity = rule.get("severity", "error")
     config = rule["config"]
-    a_pattern = normalize_pattern(config["a"])
+    a_raw = config["a"]
+    a_patterns = [normalize_pattern(x) for x in (a_raw if isinstance(a_raw, list) else [a_raw])]
     b_patterns = [normalize_pattern(b) for b in config["b"]]
     first_b_off = -1
     first_b_hex = None
@@ -289,8 +290,13 @@ def check_before(rule, data, decoded, ceiling, R):
             first_b_hex = b_hex
     if first_b_off == -1:
         return True, False, None
-    a_idx = first_occurrence(data, a_pattern)
-    if a_idx == -1 or a_idx >= first_b_off:
+    a_before = False
+    for a_pat in a_patterns:
+        idx = first_occurrence(data, a_pat)
+        if idx != -1 and idx < first_b_off:
+            a_before = True
+            break
+    if not a_before:
         msg = rule["message"].format(b_hex=first_b_hex)
         return False, (severity == "warn"), msg
     return True, False, None

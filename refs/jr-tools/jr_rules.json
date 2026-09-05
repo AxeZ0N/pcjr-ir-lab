@@ -65,10 +65,10 @@
       "kind": "before",
       "severity": "warn",
       "config": {
-        "a": "B000E643",
+        "a": ["B000E643", "B040E643", "B080E643"],
         "b": ["E440", "E441", "E442"]
       },
-      "message": "bare counter read {b_hex} without latch idiom mov al,0 / out 43h,al (B0 00 E6 43). CH0CAL latch/read idiom required; 41h reads are a keyboard hazard"
+      "message": "bare counter read {b_hex} without a preceding latch command (mov al,00h/40h/80h then out 43h). Latch the counter before reading; 41h reads are a keyboard hazard only with NMI live"
     },
     {
       "id": "nmi-mask",
