@@ -2383,3 +2383,24 @@ jr lint latch-read rule hard-errors on IN 41h even with NMI masked
 Blocks the CH1 loop-count leg and the settle-NOP overshoot test.
 Policy decision required; do not cite Rule 6 as authoritative against
 masked CH1 reads until resolved.
+## 2026-09-04 · latch_read_gate_resolution · decision
+supersedes: 2026-09-04 · latch_read_gate_conflict · open item
+
+CH1 latch/read (mov al,40h / out 43h,al / in 41h / in 41h) is authorized
+iff NMI is masked first (out 0A0h,00h), with NMI restored to 80h before
+RETF. The hazard is live keyboard NMI, not the CH1 read itself. Grounds:
+kbdnmi_ch1_latch_conflict (BIOS 0FAB latches/reads CH1 stock on every
+keystroke, manual-verified) and ch1_masked_read_safe (empirical, 3/3
+intact). The stage-5 nmi-mask/nmi-restore lint rules already enforce the
+safe shape. Do not cite platform-skill Rule 6 against masked CH1 reads.
+
+## 2026-09-04 · latch_read_rule_widened · decision
+
+jr_rules.json latch-read `a` changed from scalar "B000E643" to the list
+["B000E643","B040E643","B080E643"] (CH0/CH1/CH2 counter-latch commands).
+jr.py check_before now normalizes `a` as scalar-or-list and passes if any
+pattern precedes the first bare counter read. Rule message softened to
+"41h reads are a keyboard hazard only with NMI live". Smoke verified:
+stage 6, shape bridge, CH1 latch/read sequence (B0 40 E6 43 E4 41 E4 41)
+passed with 0 errors / 0 warnings. Files patched manually; outside the
+ingest allowlist.
