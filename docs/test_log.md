@@ -722,3 +722,39 @@ Payload emitted: `COMMIT.txt`, `facts.append.md`, `sessions/2026-08-31_nmi_dispa
   "regression": "IRPING2",
   "recovery": "cold_power_cycle"
 }
+## 2026-09-04 · IRPING2 gate · pass
+
+{ "id": "IRPING2_gate_20260904", "source": "IRPING2.BAS",
+  "expected": { "status": "3" },
+  "observed": { "status": 3 },
+  "verdict": "pass" }
+
+## 2026-09-04 · CH1RATE run 1 · artifact
+
+{ "id": "CH1RATE_DIFF_r1", "source": "CH1RATE.BAS",
+  "expected": { "return": "RETURNED OK", "status": 1, "ratio": "quadrant" },
+  "observed": { "return": "RETURNED OK", "status": 1,
+                "reported_dCH0": 46226, "reported_dCH1": 43428,
+                "reported_ratio": 0.93947 },
+  "verdict": "no_result — subtraction artifact",
+  "note": "True decrements CH0=19310, CH1=22108, R~1.145." }
+
+## 2026-09-04 · CH1RATE run 2 · artifact
+
+{ "id": "CH1RATE_DIFF_r2", "source": "CH1RATE.BAS",
+  "observed": { "reported_ratio": 0.9370 },
+  "verdict": "no_result — same artifact" }
+
+## 2026-09-04 · LOOPCOUNT N=1 CH0 · pass
+
+{ "id": "LOOPCOUNT_N1_CH0_CTRL", "source": "LOOPCOUNT.BAS",
+  "expected": { "status": 1, "dCH0": "small (10-40)" },
+  "observed": { "status": 1, "t0": 10714, "t1": 10582, "dCH0": 132 },
+  "verdict": "pass" }
+
+## 2026-09-04 · LOOPCOUNT N=1000 CH0 · pass
+
+{ "id": "LOOPCOUNT_N1000_CH0", "source": "LOOPCOUNT.BAS",
+  "expected": { "status": 1, "dCH0": "132 + 999*(18-75)" },
+  "observed": { "status": 1, "t0": 28786, "t1": 10006, "dCH0": 18780 },
+  "verdict": "pass — 18.67 ticks/iter, 74.7 cycles at 1.19318 MHz" }

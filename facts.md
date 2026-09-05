@@ -2332,3 +2332,54 @@ cannot cost 114 ticks (two INs, two NOPs); the effective CH1 rate —
 conflicted at 0FC6 — is the live candidate. Next test: direct rate
 measurement — latch CH1, NOP a known cycle count, re-latch, read the
 decrement.
+## 2026-09-04 · ch1_rate_manual_verified_838ns · manual-verified
+
+Manual 2-35:21-25, grep-verified: A0h D5=0 selects the 1.1925 MHz clock
+into 8253 CH1. 1 / 1.1925 MHz = 0.8385 us/tick. The 0FC6 comment's
+"310 USEC AWAY" fragment is the outlier; 544 ticks x 0.838 us = 456 us,
+consistent with the 526-tick half-cell analysis. The CH1 tick rate is
+no longer open for the D5=0 branch.
+supersedes: 2026-09-04 · overshoot_cloneside_rate_live · open item
+
+## 2026-09-04 · ch0_rate_loopcount_empirical · empirical
+
+LOOPCOUNT CH0: N=1 baseline 132 ticks; N=1000 18780 ticks.
+(18780 - 132) / 999 = 18.67 CH0 ticks per LOOP iteration. At the
+manual-derived CH0 input of 1.19318 MHz that is 18.67 x 4 = 74.7 CPU
+cycles/iter. The 2.38636 MHz branch would require 37.4 cycles/iter,
+implausible against a 17-cycle nominal LOOP plus PCjr wait states.
+Corroborates the 18.2 Hz derivation and BIOS control word 36h/count
+65536. Supersedes the 2.38636 MHz empirical value in the hardware_map
+TIMER0 row.
+
+## 2026-09-04 · loop_cost_measured_75cycles · empirical
+
+Bare LOOP iteration measures ~74.7 CPU cycles on this PCjr (17 nominal
+plus wait states), via CH0 loop-count with settle NOPs and NMI masked.
+Replaces the ~70-cycle listing-arithmetic placeholder.
+
+## 2026-09-04 · ch1rate_939_artifact · analysis
+
+CH1RATE's reported ratios 0.93947 and 0.9370 are artifacts of an
+inverted down-counter subtraction (T1-T0 instead of T0-T1). True
+decrements reconstructed: CH0=19310, CH1=22108, R~1.145. The CH0
+channel agrees with the LOOPCOUNT prediction (~19118). No rate anomaly;
+the wildcard is closed. The CH1 loop-count leg remains gated by
+latch_read_gate_conflict.
+
+## 2026-09-04 · overshoot_settle_nop_hypothesis · open item
+
+Leading remaining hypothesis for the 114-tick CH1-verbatim overshoot:
+the clone omitted the BIOS settle NOPs after OUT 43h (pattern at
+0FAF/0FB0). An unsettled latch read seeds the reference DI late,
+producing a fixed positive overshoot. Test requires IN 41h and is
+blocked by latch_read_gate_conflict.
+
+## 2026-09-04 · latch_read_gate_conflict · open item
+
+jr lint latch-read rule hard-errors on IN 41h even with NMI masked
+(OUT A0h,00h), contradicting BIOS 0FAB stock behavior
+(kbdnmi_ch1_latch_conflict) and ch1_masked_read_safe (3/3 intact).
+Blocks the CH1 loop-count leg and the settle-NOP overshoot test.
+Policy decision required; do not cite Rule 6 as authoritative against
+masked CH1 reads until resolved.
