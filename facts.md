@@ -2437,3 +2437,42 @@ added. 16-bit unsigned 8253 counter reads need DEFDBL accumulators.
 docs/anchors/LOOPCOUNT.BAS carries the same latent DEFINT T0/T1 typing;
 its hardware pass did not trigger it because CH0 reads sat below 32768.
 Retype hazard only — anchor bytes unaffected.
+## 2026-09-05 · throttle_60_empirical_safe · empirical
+
+User field report: 86 ch/s (the theoretical serial max) drops characters
+near-deterministically; 60 ch/s has never dropped a character. No
+systematic rate sweep exists. The throttle is a load-bearing reliability
+margin, not a policy convenience.
+
+supersedes: emitter_throttle_60 (the "not a ceiling" framing only)
+
+## 2026-09-05 · typeahead_buffer_unmeasured · open item
+
+No fact exists for the BIOS type-ahead buffer: size, location, overflow
+behavior, and drain rate are all unmeasured. It is the leading candidate
+for the deterministic 60→86 drop. `stock_throughput_retired` already
+flagged the "type-ahead vs keyboard MPU buffer" ambiguity and never
+resolved it.
+
+First measurement (no machine code): read buffer head/tail at 0040:001A
+and 0040:001C before and after a fast paste. Standard IBM PC BIOS data
+area addresses; `; VERIFY: 40:1A/1C against PCjr listing` before relying.
+
+## 2026-09-05 · parallel_decode_not_speedup · analysis
+
+Parallel/edge-triggered decode buys zero direct chars/sec. The 86 ch/s
+serial ceiling is frame-wall-clock-bound (~5823 us/frame), not CPU-bound.
+Its value is: (1) recovering 60→86 by freeing CPU for the BASIC consumer,
+(2) machine responsiveness during paste, (3) prerequisite for the
+framing-only dense ~2x — a busy-wait decoder cannot sustain dense because
+CPU hostage scales with frame rate. Parallelism is an enabling feature,
+not a throughput feature.
+
+## 2026-09-05 · effective_gap_throttle_slack · analysis
+
+At 60 ch/s the Pi throttle re-spaces frames to an effective ~4010 us gap,
+close to the stock 4840 us 11-stop-bit figure; the banked 1500 us is only
+realized near the 86 ceiling. At 86 ch/s the effective gap is exactly
+~1492 us with zero slack, and CPU hostage is ~82.5% (2 frames × 4.8 ms per
+11.6 ms period), starving the BASIC line editor. The 86 drop is compound:
+transport at the AGC recovery boundary plus consumer starvation.
