@@ -758,3 +758,16 @@ Payload emitted: `COMMIT.txt`, `facts.append.md`, `sessions/2026-08-31_nmi_dispa
   "expected": { "status": 1, "dCH0": "132 + 999*(18-75)" },
   "observed": { "status": 1, "t0": 28786, "t1": 10006, "dCH0": 18780 },
   "verdict": "pass — 18.67 ticks/iter, 74.7 cycles at 1.19318 MHz" }
+## 2026-09-04 · CH1LOOP_rate · failed_to_disprove
+
+{
+"id": "CH1LOOP_rate",
+"hypothesis": "H — CH1 decrements at 1.1925 MHz with A0h D5=0 (manual 2-35:21-25).",
+"falsifier": "F — Δ outside 18.0..19.4 CH1 ticks/LOOP",
+"clean_run": "status=1, RETURNED OK, loaded 69, both builds",
+"verdict": "failed_to_disprove"
+}
+
+N=1:   t0=47480  t1=47348  dCH1=132
+N=1000: t0=3908   t1=50664  dCH1=18780
+Δ = (18780 − 132) / 999 = 18.67 CH1 ticks/LOOP

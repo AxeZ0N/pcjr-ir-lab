@@ -2404,3 +2404,36 @@ pattern precedes the first bare counter read. Rule message softened to
 stage 6, shape bridge, CH1 latch/read sequence (B0 40 E6 43 E4 41 E4 41)
 passed with 0 errors / 0 warnings. Files patched manually; outside the
 ingest allowlist.
+## 2026-09-04 · ch1_loopcount_clean_run · empirical
+
+CH1LOOP probe (LOOPCOUNT CH0 anchor + six CH1 edits) hardware-passed both
+builds, clean: status=1, RETURNED OK, loaded 69 bytes.
+
+- N=1:   t0=47480  t1=47348  dCH1=132    (no wrap)
+- N=1000: t0=3908   t1=50664  dCH1=18780  (wrap, +65536)
+
+Δ = (18780 − 132) / 999 = 18.67 CH1 ticks per LOOP iteration.
+Byte-identical to the CH0 anchor's 18.67 ticks/LOOP.
+
+## 2026-09-04 · ch1_rate_disproof_failed_to_disprove · analysis
+
+Disproof contract CH1LOOP_rate: H = "CH1 decrements at 1.1925 MHz with
+A0h D5=0 (manual 2-35:21-25)." F = Δ outside 18.0..19.4 ticks/LOOP.
+
+F not observed (Δ=18.67). Verdict: failed_to_disprove. H survives this
+one test and nothing more; not promoted to empirical fact.
+
+Prior R~1.145 decrement-ratio (CH0=19310, CH1=22108) is now suspect.
+Loop-count cancels fixed latch/read overhead via the N=1 control; the
+decrement-ratio method did not. Fixed-overhead hypothesis is analysis,
+unverified.
+
+## 2026-09-04 · bas_unsigned16_runner_overflow · empirical
+
+DEFINT accumulator T0/T1 overflows when a 16-bit unsigned PEEK value
+exceeds 32767. CH1LOOP line 190 failed on T1=50664 until DEFDBL T was
+added. 16-bit unsigned 8253 counter reads need DEFDBL accumulators.
+
+docs/anchors/LOOPCOUNT.BAS carries the same latent DEFINT T0/T1 typing;
+its hardware pass did not trigger it because CH0 reads sat below 32768.
+Retype hazard only — anchor bytes unaffected.
