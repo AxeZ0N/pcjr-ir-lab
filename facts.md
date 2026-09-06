@@ -2540,3 +2540,115 @@ IRET` without a ring write. Toggle breaks (NumLock/ScrollLock) toggle
 on the IR path.
 
 supersedes: none — strengthens `key62_int_full_path_drop`
+## 2026-09-06 · cartridge_basic_has_no_timer · empirical
+
+Cartridge BASIC has no `TIMER` function. A program line assigning `TIMER`
+raised `Illegal function call` on hardware. This is a hard absence, not a
+timing nuance. Pure-BASIC timing must use a PEEK of the BIOS timer counter,
+a FOR/NEXT delay, or the CH0 bridge.
+
+## 2026-09-06 · bios_timer_counter_006c · manual-verified
+
+`bios_grep` listing line 236: `TIMER_LOW` at `0040:006C` (DW),
+`TIMER_HIGH` at `0040:006E` (DW), `TIMER_OFL` at `0040:0070` (DB).
+Incremented every timer interrupt at listing `FEAC` (system 18.2 Hz).
+Readable via `DEF SEG=&H40` + `PEEK`.
+
+## 2026-09-06 · keyboard_ring_capacity_15_empirical · empirical
+
+Drainless probe (DRAINLESS.BAS, no consumer) filled exactly 15 entries at
+both 60 cps and 86 cps — pointer delta 30 bytes (15 words) before the
+full-path drop froze the tail. First empirical capacity-15 on the IR path.
+Strengthens `keyboard_buffer_anatomy`; does not supersede it.
+
+## 2026-09-06 · ir_transport_clean_86_drainless · empirical
+
+Run B (86 cps drainless, 30 h) gave 15/15 fill with 15 h echoed on return.
+All 30 make frames decoded; no upstream transport loss at 86 with no
+consumer. The 86-drop behavior is therefore not a transport decode failure
+in isolation.
+
+## 2026-09-06 · input_line_cap_254 · empirical
+
+A single `INPUT` line caps at ~254 chars, rate-independent. 300 h sent at
+86 cps and again at 60 cps both returned `len=254`; the remaining 46 chars
+overflowed the 15-ring and the trailing Enter was lost. Once the line
+buffer is full the consumer stops draining the ring. The cap dominates
+long-line paste loss and does not move with paste rate.
+
+## 2026-09-06 · cap_overflow_drops_enter · empirical
+
+When the `INPUT` line buffer is full, overflow chars fill the 15-ring and
+the trailing Enter make arrives against a full ring, is dropped by the
+`111C` full path, and `INPUT` never returns on its own. Recovery is manual
+(Ctrl+Break or cold power-cycle). This is the concrete hang behind
+"failed to press enter."
+
+## 2026-09-06 · stdin_passthrough_throttle_bug · decision
+
+`pycjr.py` `stdin_passthrough` called `emu.send_char(ch)` with no pacing;
+the throttle lived only in `send_text`. Result: `--stdin` emitted at the
+wave-limited ~86 cps regardless of `--cps`; `--cps` was effectively
+ignored on that path. Every prior `--stdin` paste labeled "60" was
+contaminated.
+
+Fix (manual; `pycjr.py` is NOT payload-ingestible):
+1. Move `_throttle()` into `send_char` — call it after the send in both
+   the SCAN branch and the shifted branch.
+2. Remove the `_throttle()` call from `send_text` (now redundant).
+3. Add `--cps` (`type=int, default=60`) and wire
+   `PCjrEmulator(chars_per_sec=args.cps)`.
+
+`send_text` becomes just the loop; `stdin_passthrough` needs no change.
+`use_enter_delay` is a dead parameter in `send_char` — strip or leave, but
+state which so the diff stays honest.
+
+## 2026-09-06 · field_86_drop_reinterpreted · analysis
+
+The historical field report "86 drops, 60 safe" is now explained without a
+consumer-drain-rate story: (a) long-line drops are the 254-char cap and are
+rate-independent, and (b) `--stdin` pastes were unthrottled (~86 cps) even
+when the user believed they were 60. The consumer-starvation framing in
+`effective_gap_throttle_slack` no longer carries the paste path.
+
+supersedes: the paste-path reading of 2026-09-05 · effective_gap_throttle_slack
+
+## 2026-09-06 · run_c_dmeasure_retired · decision
+
+The `D(86) < 86` consumer-drain measurement is retired. The reproducible
+wall is the `INPUT` cap at ~254 chars plus the Enter-drop wedge, neither of
+which a drain-rate measurement explains. A precise `D` no longer
+discriminates the paste-failure mechanism.
+
+supersedes: the Run C design in the 09-05 buffer-overflow battery spec
+
+## 2026-09-06 · drop_line_boundary_repro · empirical
+
+During a pre-fix `--stdin` paste (unthrottled ~86 cps) of a multi-line
+program, line `40 end` arrived as `4nd` — the `0`, one space, and `e`
+dropped. Consistent with ring overflow while the consumer processes each
+Enter; drops cluster at line starts. Rate attribution pending: this was
+unthrottled and cannot be assigned to 60 cps.
+
+## 2026-09-06 · tiny_paste_60_clean · empirical
+
+After the throttle fix, a tiny multi-line program paste completed cleanly.
+Single data point; not a clean-rate verification, but consistent with the
+throttle-bug explanation for the prior contamination.
+
+## 2026-09-06 · recovery_persistence_reopen · open item
+
+The "IR input never fully recovers after a skip" observation is reopened
+with a simpler rival mechanism: cap-breach + Enter-drop wedges BASIC's
+`INPUT` against a full ring, which reads as persistent loss. Prior
+AGC-desensitization hypotheses (`agc_recovery_threshold`,
+`agc_full_recovery_threshold`) remain untested against this software
+wedge. Post-fix, at true 60, re-test recovery before attributing
+persistence to analog.
+
+## 2026-09-06 · drainless_delay_calibration · empirical
+
+A `FOR I=1 TO 30000` delay in the drainless probe took ~2 minutes on
+hardware. `8000` was adopted as the working hold window. Verify per run
+that the send completes inside the window; if `POST` shows no fill, raise
+the count.

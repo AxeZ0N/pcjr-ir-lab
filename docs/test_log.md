@@ -770,4 +770,22 @@ Payload emitted: `COMMIT.txt`, `facts.append.md`, `sessions/2026-08-31_nmi_dispa
 
 N=1:   t0=47480  t1=47348  dCH1=132
 N=1000: t0=3908   t1=50664  dCH1=18780
-Δ = (18780 − 132) / 999 = 18.67 CH1 ticks/LOOP
+Δ = (18780 − 132) / 999 = 18.67 CH1 ticks/LOOP## 2026-09-06 · irping2_regression
+
+{"id":"irping2","observed":"status=3","clean_run":true,"verdict":"pass"}
+
+## 2026-09-06 · drainless_run_a_60cps
+
+{"id":"drainless_ab","run":"A","rate":"60 cps","observed":{"pre":"h=36 t=36","post":"h=36 t=34","fill_entries":15,"echo":"15 h"},"clean_run":true,"verdict":"failed_to_disprove"}
+
+## 2026-09-06 · drainless_run_b_86cps
+
+{"id":"drainless_ab","run":"B","rate":"86 cps","observed":{"pre":"h=60 t=60","post":"h=60 t=58","fill_entries":15,"echo":"15 h"},"clean_run":true,"verdict":"failed_to_disprove"}
+
+## 2026-09-06 · skiplen_250_clean
+
+{"id":"skiprepr","runs":2,"nominal":250,"len":250,"clean_run":true,"verdict":"falsifier not observed below cap"}
+
+## 2026-09-06 · input_cap_300
+
+{"id":"skiplen","runs":[{"rate":"86 cps","nominal":300,"len":254,"enter":"dropped"},{"rate":"60 cps","nominal":300,"len":254,"enter":"dropped"}],"clean_run":false,"verdict":"cap confirmed rate-independent"}
