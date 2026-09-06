@@ -2513,3 +2513,30 @@ Two leaks in `facts.md`, one unrecorded:
 2. **Recorded (lines 2181–2187):** bare handoff scaffold for `2026-09-04_jr_lint_v2_refactor_close.md`. The prior fact `facts_tail_scaffold_leak` said strip lines 2188–2198 (off — 2188 is the fact's own heading) and claimed that session file was absent, but `sessions/2026-09-04_jr_lint_v2_refactor_close.md` **is present** in the tree; its repair text is stale.
 
 Repair is manual — `facts.md` is not payload-replaceable. Strip leak #1 (1768–1813) and #2 (2181–2187); leak #1 needs its session file restored from the embedded body before the strip.
+## 2026-09-05 · overrun_drop_unreachable_ir · manual-verified
+
+The `KB_NOISE` overrun drop at listing 157A lives in `KB_INT` (INT 9,
+physical-keyboard handler, `1570 CMP AL,0FFh` → `157A` drop). The
+overrun code `FFh` is a physical keyboard-scanner internal-buffer
+condition, not a frame the PyCJr Pi emitter generates. PyCJr input is
+IR-only via NMI → `KEY62_INT` (`F000:10C6`); port 60h is never driven
+by the Pi. Therefore the overrun drop site is unreachable on the IR
+chain and the full path `1122` is the only reachable producer-side
+drop. This scopes `key62_int_full_path_drop` and
+`buffer_poll_snapshot_confound` (the beep-discriminator claim) to the
+IR path without change to either.
+
+`; VERIFY: pycjr.py frame table emits no FFh scan code`
+
+## 2026-09-05 · break_disposition_ordinary_keys · manual-verified
+
+Ordinary-key break disposition in `KEY62_INT` completes the fill-rate
+trace. `1276 TEST AH,BREAK_BIT` → `1279 JZ KB13` (make proceeds to the
+write path). Breaks fall to toggle-key handling at `127B`; non-toggle
+breaks exit via `1281 JNZ KB12_2` → `1296/12A7 JNE RET_INT` → `12A2
+IRET` without a ring write. Toggle breaks (NumLock/ScrollLock) toggle
+`KB_FLAG` state and do not write a character entry. Combined with
+`1107 IRET` (extended-set breaks), this confirms 1 entry per character
+on the IR path.
+
+supersedes: none — strengthens `key62_int_full_path_drop`
