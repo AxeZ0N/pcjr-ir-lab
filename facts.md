@@ -1765,10 +1765,7 @@ write act passes (N1-A); every unmasked-fire variant has failed.
 Surviving hypothesis untested: frame completion by KBDNMI is mandatory,
 so swallowing a key without chaining desyncs the receiver. See
 sessions/2026-08-31_nmi_dispatch_ladder.md.
-</BDS:create_file>
-<BDS:create_file fileName="sessions/2026-08-31_nmi_dispatch_ladder.md">
 
-```markdown
 # Handoff — NMI custom-dispatch ladder (single scope)
 
 Date: 2026-08-31
@@ -2187,8 +2184,6 @@ negative side measured). No hardware run, no new anchors.
 
 ## 2026-09-04 · facts_tail_scaffold_leak · conflict
 
-`facts.md` lines 2188–2198 contain a leaked BDS payload scaffold: two
-`<BDS:create_file>` tags and the opening lines of the intended
 `sessions/2026-09-04_jr_lint_v2_refactor_close.md` handoff, pasted
 directly into the fact journal instead of being written as the session
 file. The session file itself is absent from `sessions/`.
@@ -2476,3 +2471,45 @@ realized near the 86 ceiling. At 86 ch/s the effective gap is exactly
 ~1492 us with zero slack, and CPU hostage is ~82.5% (2 frames × 4.8 ms per
 11.6 ms period), starving the BASIC line editor. The 86 drop is compound:
 transport at the AGC recovery boundary plus consumer starvation.
+## 2026-09-05 · keyboard_buffer_anatomy · manual-verified
+
+`bios_grep` listing lines 155–157 (DATA_AREA at 0400):
+
+- `BUFFER_HEAD` at `0040:001A` (DW) — "POINTER TO HEAD OF KEYBOARD BUFF"
+- `BUFFER_TAIL` at `0040:001C` (DW) — "POINTER TO TAIL OF KEYBOARD BUFF"
+- `KB_BUFFER` at `0040:001E`, `DW 16 DUP(?)` — "ROOM FOR 15 ENTRIES"
+
+POST init (listing 1352–1357): `SI = 001E`; `BUFFER_HEAD = BUFFER_TAIL = BUFFER_START = 001E`; `ADD SI,32` → `BUFFER_END = 003E`. Ring wraps `001E ↔ 003E` (16 words, 15 usable, 1 full/empty sentinel). `HEAD == TAIL` ⇒ empty.
+
+## 2026-09-05 · key62_int_full_path_drop · manual-verified
+
+`bios_grep` listing 3667–3687 and 3675–3684 (KEY62_INT at `F000:10C6`):
+
+- `1105 JZ KBX2` — make code proceeds to the write path.
+- `1107 IRET` — **break code discarded, no buffer entry** (ring fills 1 entry per character, not 2).
+- `110D MOV BX,BUFFER_TAIL` → `1113 CALL K4` (increment tail with wrap) → `1116 CMP BX,BUFFER_HEAD`.
+- Not full (`111A JNE KBX3`): `1135 MOV [SI],AX`, `1137 MOV BUFFER_TAIL,BX`, `IRET`.
+- **Full** (`tail+1 == head` after K4): `111C` `KB_NOISE` beep (`BX=80h` freq, `CX=48h` duration), clear `KB_FLAG`/`KB_FLAG_1`/`KB_FLAG_2`, `IRET` — **the character is dropped and never written**.
+
+The full path is the only caller of `KB_NOISE` on this branch, so **a drop with no beep is not ring overflow**.
+
+## 2026-09-05 · typeahead_buffer_resolved · manual-verified
+
+supersedes: 2026-09-05 · typeahead_buffer_unmeasured
+
+Buffer size, location, and overflow behavior are now listing-verified — see `keyboard_buffer_anatomy` and `key62_int_full_path_drop`. The handoff's proposed addresses `0040:001A/001C` are confirmed. Still unmeasured (the two live gates): BASIC drain rate `D` at 60 vs 86 ch/s, and full-ring frequency/drop count at 86 ch/s.
+
+## 2026-09-05 · buffer_poll_snapshot_confound · analysis
+
+A pre/post pointer snapshot cannot distinguish consumer-side saturation from transport loss — a ring that filled and drained between two reads shows zero net delta on `HEAD`/`TAIL`. The buffer-pointer measurement must be a **live poll during the paste**, not a before/after snapshot. The beep is the sharp discriminator: ring overflow always fires `KB_NOISE`, so drop-with-beep ⇒ overflow, drop-without-beep ⇒ transport/upstream. The prior `consumer_starvation` falsifier ("buffer stays empty while drops still occur") is correct in spirit but must be restated as "drop observed with no beep and ring non-full at drop time."
+
+## 2026-09-05 · facts_tail_leak_reconciled · conflict
+
+supersedes: 2026-09-04 · facts_tail_scaffold_leak
+
+Two leaks in `facts.md`, one unrecorded:
+
+1. **Unrecorded (lines 1768–1813):** raw `BDS:create_file` tags plus the full `sessions/2026-08-31_nmi_dispatch_ladder.md` body embedded between two legitimate facts. That session file is **absent** from `sessions/`.
+2. **Recorded (lines 2181–2187):** bare handoff scaffold for `2026-09-04_jr_lint_v2_refactor_close.md`. The prior fact `facts_tail_scaffold_leak` said strip lines 2188–2198 (off — 2188 is the fact's own heading) and claimed that session file was absent, but `sessions/2026-09-04_jr_lint_v2_refactor_close.md` **is present** in the tree; its repair text is stale.
+
+Repair is manual — `facts.md` is not payload-replaceable. Strip leak #1 (1768–1813) and #2 (2181–2187); leak #1 needs its session file restored from the embedded body before the strip.
