@@ -329,9 +329,7 @@ class PCjrEmulator(PCjrIRSender):
         """
         if ch in SCAN:
             self.send_key_press(SCAN[ch])
-            if ch == '\n':
-                time.sleep(0.25)
-            self._throttle()
+            #if ch == '\n': time.sleep(0.25)
             return
 
         if ch.isupper() and ch.lower() in SCAN:
