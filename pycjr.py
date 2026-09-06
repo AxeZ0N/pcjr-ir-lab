@@ -321,11 +321,17 @@ class PCjrEmulator(PCjrIRSender):
         self.char_interval_s = 1.0 / max(1, chars_per_sec)
         self._last_char_time = 0.0
 
-    def send_char(self, ch, use_enter_delay=True):
-        """Send one character as an atomic make+break sequence."""
+    def send_char(self, ch):
+        """Send one character as an atomic make+break sequence.
+
+        Throttling lives here, not in callers: every text path
+        (--text, --stdin, send_text) is paced at chars_per_sec.
+        """
         if ch in SCAN:
             self.send_key_press(SCAN[ch])
-            if ch == '\n': time.sleep(0.25)
+            if ch == '\n':
+                time.sleep(0.25)
+            self._throttle()
             return
 
         if ch.isupper() and ch.lower() in SCAN:
@@ -340,11 +346,11 @@ class PCjrEmulator(PCjrIRSender):
             + self.key_press_pulses(base)
             + self.build_frame(SHIFT_SCAN | 0x80)
         )
+        self._throttle()
 
     def send_text(self, text):
         for ch in text:
             self.send_char(ch)
-            self._throttle()
 
     def _throttle(self):
         now = time.monotonic()
