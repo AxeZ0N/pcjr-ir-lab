@@ -617,6 +617,8 @@ def main():
     parser.add_argument(
         "--battery", type=int, default=4, help="trials per RUN (must match BASIC)"
     )
+    parser.add_argument( "--cps", type=int, default=60, help="characters per second throttle"
+    )
 
     args = parser.parse_args()
 
@@ -645,7 +647,7 @@ def main():
             harness.close()
         return
 
-    emu = PCjrEmulator(chars_per_sec=60)
+    emu = PCjrEmulator(chars_per_sec=args.cps)
     emu.connect()
     try:
         if args.stdin:
