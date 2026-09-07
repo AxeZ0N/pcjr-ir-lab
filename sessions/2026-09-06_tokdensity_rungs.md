@@ -1,4 +1,3 @@
-# Handoff — Token
 # Handoff — Token-density rungs + throttle completion
 
 Date: 2026-09-06
