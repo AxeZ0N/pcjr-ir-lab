@@ -854,3 +854,19 @@ N=1000: t0=3908   t1=50664  dCH1=18780
 "falsifier": "F — overshoot unchanged (±2 ticks) across 0/2/8 NOP variants",
 "verdict": "failed_to_disprove — F not observed on clean runs"
 }
+## 2026-09-07 · paste_wrap_86_postreboot · failed_to_disprove
+
+```
+{
+"id": "paste_wrap_86_postreboot",
+"hypothesis": "H — bridge-entry contamination persists until reset",
+"falsifier": "F — corruption observed in a clean post-reboot paste at 86 cps",
+"clean_run": "full multi-line paste, LIST continuous, keyboard responsive",
+"verdict": "failed_to_disprove"
+}
+```
+
+Observed: post-reboot multi-line paste at true 86 cps, no corruption,
+keyboard alive. F not observed on a clean run. H survives this test and
+nothing more. The 40-char wrap seen on an earlier payload was a display
+artifact, not the corruption signature under test.

@@ -2779,3 +2779,23 @@ Non-text sender paths (send_ansi_escape, send_scan, send_ctrl_break,
 send_fkey, send_reset) emit fixed-length keystrokes; the throttle is
 intentionally omitted on these paths.
 supersedes: sender_nontext_paths_unthrottled
+## 2026-09-07 · screen_wrap_40_paste_boundary · empirical
+
+At exactly 40 chars in the 40-column text mode the cursor wraps and
+the next line renders blank. Observed during paste payload testing:
+line `100 A$="P0100` + filler hit 40 and wrapped. This is a display
+artifact, distinct from the line-table corruption recorded in
+`paste_corruption_memory_state` (machine-code bytes in line numbers).
+Paste payload lines must total <=39 chars. The line-number width
+changes the head length (2-digit head = 12, 3-digit = 13), so filler
+must be computed from the actual head: `filler = target_len -
+len(head) - 1`.
+
+## 2026-09-07 · postreboot_86_paste_clean · empirical
+
+Directly after reboot, a multi-line paste at true 86 cps showed no
+corruption and the keyboard stayed responsive. Consistent with
+`linewatch_86_repro_clean` and with the `paste_corruption_memory_state`
+hypothesis that a reset clears bridge-entry contamination. Does NOT
+disprove the contamination hypothesis: the clean run is post-reset,
+exactly as that hypothesis predicts.
