@@ -2652,3 +2652,6 @@ A `FOR I=1 TO 30000` delay in the drainless probe took ~2 minutes on
 hardware. `8000` was adopted as the working hold window. Verify per run
 that the send completes inside the window; if `POST` shows no fill, raise
 the count.
+## 2026-09-06 · send_char_plain_path_throttle · empirical
+
+py
