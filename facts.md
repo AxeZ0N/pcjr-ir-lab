@@ -2671,3 +2671,47 @@ renumbering. Density-driven drop disproved at 27 chars and 86 cps.
 `drop_line_boundary_repro` remains open: its confounds (unthrottled
 native-floor rate, removed enter delay) are now both removed, and a
 clean controlled run did not reproduce the line-start drop.
+## 2026-09-07 · linewatch_86_repro_clean · empirical
+
+Two controlled true-86 pastes on the post-fix text path produced zero
+loss:
+
+- 31-line self-check payload including the literal `40 end` (the
+  historical `4nd` repro shape): `count=31 mismatch=0 last=ZZ`, ring
+  head==tail at stop.
+- 10 × 40-char uniform lines: all ten reported length 40.
+
+Neither the drain-stall hypothesis nor the ring-wraparound hypothesis
+showed at 86 on these shapes. The `4nd` drop did not reproduce. This is
+failure-to-reproduce, not proof of absence; the historical observation
+remains single-occurrence and pre-fix. Strengthens
+`field_86_drop_reinterpreted`; does not supersede it.
+
+## 2026-09-07 · throttle_fix_code_verified · empirical
+
+pycjr.py read in full (682 lines). `send_char` calls `_throttle()` on
+both the plain-SCAN path (line 333) and the Shift path (line 348). The
+non-tty `--stdin` branch routes `sys.stdin.buffer.read()` through
+`send_text` to `send_char`, so file pastes are paced. `--cps` is wired
+into `PCjrEmulator(chars_per_sec=args.cps)` at line 655. Frame bit time
+is uniformly 439 us (1-bit: 62+377 us; 0-bit: 220+62+157 us);
+make+break is ~11.6 ms, so 86 cps is the physical back-to-back floor
+where `_throttle` sleeps ~0. The historical plain-path throttle gap is
+closed on the text path.
+
+## 2026-09-07 · harness_cps_propagation · decision
+
+`--cps` now propagates to `PCjrTestHarness` (manual edit to pycjr.py;
+not payload-ingestible). `__init__` gains `chars_per_sec=60`; the
+`--run_test` branch passes `chars_per_sec=args.cps`. `arm_delay_s`,
+`run_wait_s`, and `cls_wait_s` stay fixed BASIC wait windows and must
+not scale with cps. Probe waves (`build_probe_wave` + `send_wave`)
+correctly bypass the throttle; only `_send_line` characters pace.
+
+## 2026-09-07 · sender_nontext_paths_unthrottled · open item
+
+`send_ansi_escape`, `send_scan`, `send_ctrl_break`, `send_fkey`, and
+`send_reset` call `send_wave`/`send_key_press` directly with no
+`_throttle()`. Not implicated in text paste; flag wherever those paths
+are documented. The Enter delay remains commented out at
+`send_char` line 332.
