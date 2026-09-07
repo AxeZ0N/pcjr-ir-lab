@@ -2655,3 +2655,19 @@ the count.
 ## 2026-09-06 · send_char_plain_path_throttle · empirical
 
 py
+## 2026-09-06 · tokdensity60_disproved · empirical
+
+At true 60 cps with the throttle code-verified, a 40-line program paste
+of 27-char lines showed no drop for either sparse payload S (one
+assignment + remark per line) or dense payload C (six colon-separated
+assignments per line). LIST showed all 40 lines, numbered 100 through
+490, intact for both. Token density did not cause line-boundary drops
+at this payload size.
+
+## 2026-09-06 · tokdensity86_disproved · empirical
+
+Same S/C contrast at true 86 cps: no drops, no fused lines, no
+renumbering. Density-driven drop disproved at 27 chars and 86 cps.
+`drop_line_boundary_repro` remains open: its confounds (unthrottled
+native-floor rate, removed enter delay) are now both removed, and a
+clean controlled run did not reproduce the line-start drop.

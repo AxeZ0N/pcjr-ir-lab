@@ -790,3 +790,10 @@ N=1000: t0=3908   t1=50664  dCH1=18780
 
 {"id":"skiplen","runs":[{"rate":"86 cps","nominal":300,"len":254,"enter":"dropped"},{"rate":"60 cps","nominal":300,"len":254,"enter":"dropped"}],"clean_run":false,"verdict":"cap confirmed rate-independent"}
 ## 2026-09
+## 2026-09-06 · tokdensity60
+
+{"id":"tokdensity60","rate":"60 cps","payload":"S,C 40x27","sparse":"clean","dense":"clean","clean_run":true,"verdict":"disproved"}
+
+## 2026-09-06 · tokdensity86
+
+{"id":"tokdensity86","rate":"86 cps","payload":"S,C 40x27","sparse":"clean","dense":"clean","clean_run":true,"verdict":"disproved"}
