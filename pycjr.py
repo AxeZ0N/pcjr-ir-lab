@@ -462,8 +462,8 @@ def interactive_trials():
 class PCjrTestHarness(PCjrEmulator):
     """Prime once per battery, then one wave per BASIC INPUT release."""
 
-    def __init__(self, post_run_wait_s=3.0):
-        super().__init__(chars_per_sec=60)
+    def __init__(self, post_run_wait_s=3.0, chars_per_sec=60):
+        super().__init__(chars_per_sec=chars_per_sec)
         self.post_run_wait_s = post_run_wait_s
 
     def _send_line(self, text):
@@ -628,7 +628,8 @@ def main():
     args = parser.parse_args()
 
     if args.run_test is not None:
-        harness = PCjrTestHarness(post_run_wait_s=args.post)
+        harness = PCjrTestHarness(post_run_wait_s=args.post, chars_per_sec=args.cps)
+
         harness.connect()
         try:
             if args.run_test == "__interactive__":
