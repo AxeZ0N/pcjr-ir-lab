@@ -798,3 +798,28 @@ N=1000: t0=3908   t1=50664  dCH1=18780
 
 {"id":"tokdensity86","rate":"86 cps","payload":"S,C 40x27","sparse":"clean","dense":"clean","clean_run":true,"verdict":"disproved"}
 ## 202
+## 2026-09-07 · linewatch86 · result
+
+{
+"id": "linewatch86",
+"source": "LINEWATCH.BAS (self-check) + pycjr --stdin --cps 86",
+"expected": { "count": "31", "mismatch": 0, "last": "ZZ", "ring": "empty" },
+"observed": { "count": 31, "mismatch": 0, "last": "ZZ", "head": 60, "tail": 60 },
+"clean_run": true,
+"verdict": "failed_to_disprove — no loss at true 86",
+"regression": "IRPING2 (not re-run this session)",
+"recovery": "cold_power_cycle"
+}
+
+## 2026-09-07 · uniform40_86 · result
+
+{
+"id": "uniform40_86",
+"source": "ten-line 40-char uniform payload + pycjr --stdin --cps 86",
+"expected": { "lengths": "all 40" },
+"observed": { "lengths": "all 40", "stop": "Break in 50" },
+"clean_run": true,
+"verdict": "failed_to_disprove — no loss at true 86",
+"note": "rate not independently re-stated this run; same session setting as linewatch86",
+"recovery": "cold_power_cycle"
+}
