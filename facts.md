@@ -2715,3 +2715,67 @@ correctly bypass the throttle; only `_send_line` characters pace.
 `_throttle()`. Not implicated in text paste; flag wherever those paths
 are documented. The Enter delay remains commented out at
 `send_char` line 332.
+## 2026-09-07 · latchgate_masked_ch1_read_safe · empirical
+
+Masked CH1 latch/read is live-safe on this clone. Routine sequence:
+mov al,40h / out 43h,al / nop / nop / in al,41h / mov ah,al /
+in al,41h / xchg ah,al, with NMI masked first (out 0A0h,00h) and
+restored before RETF (in al,0A0h / mov al,80h / out 0A0h,al).
+Three runs returned changing 16-bit counts 18018, 15866, 17306,
+keyboard alive after each, loaded 41 bytes byte-exact.
+Backs latch_read_gate_resolution (2026-09-04) with hardware evidence.
+
+## 2026-09-07 · irping2_fallback_policy · policy
+
+Keyboard-alive over the IR link is a superset of IRPING2: it exercises
+carrier -> receiver -> demod -> PC6 edge -> NMI -> BIOS -> keyboard
+buffer -> BASIC, while IRPING2 checks only the 62h bit-6 edge count.
+When the keyboard is confirmed working, IRPING2 is an optional fallback
+for transport suspicion, not a mandatory gate. Record the actual
+evidence (clean paste + responsive keyboard); never infer status=3.
+
+## 2026-09-07 · jr_stage_model_change · decision
+
+jr-tools has changed function: stages are no longer the sole gate for
+counter reads. The latch-read rule is now a before-byte idiom check —
+any timer read of 40/41/42 must be preceded by the latch idiom
+(mov al,40h / out 43h,al). Stages select rule presets; the latch idiom
+itself satisfies the rule. Empirical: a stage=6 build carrying masked
+IN 41h with latch + 2 settle NOPs passed with zero warnings, while a
+stage=1 build selected only entry/retf-count/epilogue/no-int21h/
+no-iret/no-speaker.
+
+## 2026-09-07 · seednop_overshoot_measurement · empirical
+
+Settle NOP count at the I5 seed moves the single-wait overshoot
+monotonically. 0 NOPs -> 88 ticks (68 bytes), 2 NOPs stock -> 98 ticks
+(70 bytes), 8 NOPs -> 130 ticks (76 bytes); four runs per variant,
+identical within variant, loaded counts matched each build. The
+overshoot is seed-phase sensitive and loop-amplified, not explained by
+instruction cost alone (~5 ticks/NOP observed vs ~1.5 predicted).
+
+## 2026-09-07 · seednop_disproof_verdict · open item
+
+Hypothesis "missing settle NOPs at the I5 seed cause the overshoot"
+survived one disproof attempt: overshoot moved with NOP count
+(88/98/130), so the falsifier was not observed -> failed_to_disprove.
+Not proven, not manual-verified, not promoted to empirical fact. The
+stock 2-NOP measurement (98) did not reproduce the historical 114-116;
+the gap lives in entry/trailing-edge overhead absent from this
+single-wait probe.
+
+## 2026-09-07 · paste_corruption_memory_state · open item
+
+Full-program IR paste corrupted the BASIC line table: line numbers
+contained machine-code bytes (0x551F = 21791) and a CP437 spade (0x06)
+from the bridge entry prefix 0E 1F 55 06. Reproduced at 60 and 86 cps
+before a soft reset. Ctrl-Alt-Del before paste cleared it; a clean full
+41-byte paste then loaded and ran at 86 cps. Hypothesis: contamination
+from a prior failed entry persists until reset. Not disproven.
+
+## 2026-09-07 · nontext_senders_unthrottled_intentional · decision
+
+Non-text sender paths (send_ansi_escape, send_scan, send_ctrl_break,
+send_fkey, send_reset) emit fixed-length keystrokes; the throttle is
+intentionally omitted on these paths.
+supersedes: sender_nontext_paths_unthrottled

@@ -823,3 +823,34 @@ N=1000: t0=3908   t1=50664  dCH1=18780
 "note": "rate not independently re-stated this run; same session setting as linewatch86",
 "recovery": "cold_power_cycle"
 }
+## latchgate_seed_probe
+
+{
+"id": "latchgate_seed_probe",
+"source": "LATCHGATE.BAS",
+"runs": [
+  {"loaded": 41, "ch1": 18018},
+  {"loaded": 41, "ch1": 15866},
+  {"loaded": 41, "ch1": 17306}
+],
+"keyboard": "alive after each",
+"regression": "subsumed by clean 41-byte IR paste + responsive keyboard",
+"recovery": "cold_power_cycle",
+"verdict": "clean pass — masked CH1 latch/read live-safe"
+}
+
+## seednop_disproof
+
+{
+"id": "seednop_disproof",
+"source": "SEEDNOP.BAS",
+"runs": [
+  {"variant": "A", "nops": 0, "loaded": 68, "overshoot": 88},
+  {"variant": "B", "nops": 2, "loaded": 70, "overshoot": 98},
+  {"variant": "C", "nops": 8, "loaded": 76, "overshoot": 130}
+],
+"each_variant_runs": 4,
+"hypothesis": "H — missing settle NOPs at the I5 seed cause the overshoot",
+"falsifier": "F — overshoot unchanged (±2 ticks) across 0/2/8 NOP variants",
+"verdict": "failed_to_disprove — F not observed on clean runs"
+}
