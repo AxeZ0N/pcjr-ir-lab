@@ -1,0 +1,11 @@
+[project]
+name = "pycjr"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastmcp>=3.4.7",
+    "gitingest>=0.3.1",
+    "pytest>=9.1.1",
+]
